@@ -7,6 +7,7 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+from TwoStepModel import *
 from MultiStepModel import *
 
 
@@ -39,6 +40,42 @@ class Bermudan():
         ret = ret*self.notional
 
         return ret
+
+    # ad_pos is a (long) position in arrow-debrew securities over the two time horizon, with the dimension ngrid x 2
+
+    def price_2(self, model: TwoStepModel, ad_pos=None, with_graphs=False):
+        sgrid = model.S0 + model.xgrid
+
+        if ad_pos is None:
+            ad_pos = np.zeros((model.nX, 2))
+
+        util_v_2 = np.vectorize(lambda x: utility(x, model.lmb, model.T2))
+        hold2 = np.zeros(model.nX)
+        exercise2 = util_v_2(self.exercise_value(
+            sgrid, 1) + ad_pos[:, 1]) - util_v_2(ad_pos[:, 1])
+
+        if with_graphs:
+            plt.plot(sgrid, exercise2, '.-')
+            plt.plot(sgrid, hold2, '.-')
+            plt.show()
+
+        util_v_1 = np.vectorize(lambda x: utility(x, model.lmb, model.T1))
+        hold1 = np.dot(model.q12, np.maximum(hold2, exercise2)
+                       if self.isExercise[1] else hold2)
+        exercise1 = util_v_1(self.exercise_value(
+            sgrid, 0) + ad_pos[:, 0]) - util_v_1(ad_pos[:, 0])
+
+        if with_graphs:
+            plt.plot(sgrid, exercise1, '.-')
+            plt.plot(sgrid, hold1, '.-')
+            plt.show()
+
+        val = np.dot(model.q1, np.maximum(hold1, exercise1)
+                     if self.isExercise[0] else hold1)
+        val = val \
+            + np.dot(model.q1, util_v_1(ad_pos[:, 0]) + np.dot(model.q12, util_v_2(ad_pos[:, 1])))\
+            - np.dot(model.q1, ad_pos[:, 0]) - np.dot(model.q2, ad_pos[:, 1])
+        return val
 
     # ad_pos is a (long) position in arrow-debrew securities over exercise dates, with the dimension ngrid x nExercise
     def price_3(self, model: MultiStepModel, ad_pos=None, with_graphs=False):

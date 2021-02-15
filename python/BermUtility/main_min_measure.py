@@ -76,13 +76,13 @@ def min_measure_01(mtg_scale=1, mtg_w=1e2, with_plots=False):
     eur2.isExercise[0] = False
 
     with_berm_graphs = False
-    berm_value = berm.price_1(model, with_graphs=with_berm_graphs)
-    eur1_value = eur1.price_1(model)
-    eur2_value = eur2.price_1(model)
+    berm_value = berm.price_2(model, with_graphs=with_berm_graphs)
+    eur1_value = eur1.price_2(model)
+    eur2_value = eur2.price_2(model)
 
-    berm_val_0 = berm.price_1(base_model, with_graphs=with_berm_graphs)
-    eur1_val_0 = eur1.price_1(base_model)
-    eur2_val_0 = eur2.price_1(base_model)
+    berm_val_0 = berm.price_2(base_model, with_graphs=with_berm_graphs)
+    eur1_val_0 = eur1.price_2(base_model)
+    eur2_val_0 = eur2.price_2(base_model)
 
     print(f'{mtg_scale},{berm_value},{eur1_value},{eur2_value},{berm_val_0},{eur1_val_0},{eur2_val_0}')
 
@@ -156,7 +156,7 @@ def dual_02():
 
 
 if __name__ == "__main__":
-    #    min_measure_01(1.0, with_plots=True)
+    min_measure_01(1.0, with_plots=True)
     # min_measure_02()
-    dual_01(105, fit_min_model=True, with_plots=True)
+    # dual_01(105, fit_min_model=True, with_plots=True)
     # dual_02()
