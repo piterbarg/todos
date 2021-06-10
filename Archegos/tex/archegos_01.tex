@@ -1,14 +1,18 @@
 
 \documentclass{article}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath}
+
+\setcounter{MaxMatrixCols}{10}
 %TCIDATA{OutputFilter=LATEX.DLL}
 %TCIDATA{Version=5.50.0.2953}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Saturday, June 05, 2021 09:00:47}
-%TCIDATA{LastRevised=Saturday, June 05, 2021 16:36:34}
+%TCIDATA{LastRevised=Wednesday, June 09, 2021 08:23:26}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{Language=American English}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
 
 \newtheorem{theorem}{Theorem}
@@ -34,14 +38,322 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{tcilatex}
-
 \begin{document}
 
 
-Let $S=S(t)$ be a risk factor that, for simplicity, we call a stock. Let us
-assume its annualized volatility is $\sigma $. Consider $N+1$ primer
-brokers. We consider the situation from the point of view of broker $0.$ Let
-us assume that a client (hedge fund, or HF) has a position in $S$ against
-broker $0$. We denote the position that the PB $0$ has against HF as $P_{0}.$
+\section{Motivation}
+
+We build a simple model that estimates the impact of a forced unwind of
+large concentrated positions by a number of prime brokers that face the same
+defaulting counterparty simultaneously, taking into account, critically, the
+market impact of such unwind. We consider this as an add-on on top of the
+traditional Initial Margin (IM) model.
+
+\section{Background}
+
+A hedge fund (HF) enters synthetic positions referencing a risk factor $%
+S=S(t)$ that, for simplicity, we call a stock, against a number of prime
+brokers (PBs). For simplicity we assume the HF wants to be long. 
+
+A typical derivatives position is a total return swap (TRS) where a HF would
+receive total returns on $S$ in exchange for some funding rate. Derivatives
+are often preferred to cash equity as they are not subject to the same
+disclosure requirements as cash equity positions.
+
+A PB would hedge its short position in $S$ on a TRS by buying the equivalent
+amount of stock. While the HF is solvent, the position\ is "riskless" in the
+sense that price changes on the PB's holdings of the stock are just passed
+by the PB\ on to the client who bears all market risk. If, however, the HF
+defaults for whatever reason, the TRS will terminate, and the PB\ will be
+left with an unhedged position in the stock. 
+
+Naturally, it will try to unwind its hedge by selling the stock. If the
+movement in the stock make it so that the value is less than what the PB
+paid for the initial stock purchase, it would realize a loss. 
+
+Hence, a PB typically requires a margin, a form of collateral, from the HF.
+There are generally two kinds of margin. One is the \emph{variation margin}
+which ensures that the PB's stock value+variation margin is (approximately)
+equal to the original price the PB paid to buy the stock. This can also be
+seen/interpreted as the MTM\ on the TRS that the PB would lose should the HF
+default (here and throughout we ignore MTM changes on the funding leg of the
+TRS). 
+
+The other kind is the \emph{initial margin} that is designed to cover, with
+high probability, losses on the unwind of the stock position in orderly
+fashion over a number of days (MPOR), should the HF default and the stock
+move adversely over MPOR.
+
+\section{Setup}
+
+Let $S=S(t)$ be the stock. Let us assume the underlying annualized lognormal
+volatility of the stock is $\sigma $. 
+
+We assume that there are $N$ PBs and the position of the HF vs the $n$-th PB
+is $\pi _{n}$ units of $S,$ with $\pi _{n}>0,$ $n=1,\dots ,N.$ That means
+the PB's exposure to the HF is $-\pi _{n}S,$ and hence it is holding stock
+as a hedge with the value of%
+\begin{equation*}
+\pi _{n}S(t)
+\end{equation*}%
+at time $t.$ Moreover, to acquire the hedge, the PB borrowed money (most
+likely internally, but we record it for proper accounting)\ and holds a cash
+position in the amount of the (negative of) initial stock purchase price:%
+\begin{equation*}
+-\pi _{n}S(0).
+\end{equation*}%
+Hence the PB's MTM on the hedge portfolio at time $t,$ is%
+\begin{equation*}
+\pi _{n}\left( S(t)-S(0)\right) .
+\end{equation*}%
+Again, under the assumption of negligible variation of the funding leg MTM,
+this is the same as the negative of the MTM change on the TRS from the PB's
+point of view.
+
+We assume that each PB at time $t$ holds $V_{n}(t)$ in variational margin
+and $I_{n}(t)$ in the initial margin, $n=1,\dots ,N.$ Under a strong margin
+agreement the VM\ will be set to keep the position at zero MTM\ at each
+point in time, i.e. by requiring that
+
+\begin{equation}
+V_{n}(t)+\pi _{n}\left( S(t)-S(0)\right) =0.  \label{eq:vm1}
+\end{equation}%
+The IM\ will be calculated as a high left-tail percentile of the future
+distribution of $S$ over a specified MPOR. In reality (\ref{eq:vm1}) may
+only hold approximately due to the presence of thresholds, lags in posting
+the margin, etc. Similarly, IMs are dependent on a particular model that a
+given PB uses and could also be negotiated up-front as simply a percentage
+of notional, say. 
+
+The goal of our modelling is to estimate market feedback effects and its
+impact on a forced unwind from the point of view of one of the PBs. Each PB
+obviously knows (or at least should!) how its own VM and IM are calculated,
+but would have little idea about others'. Nor would it know the critical
+parameters such as actual exposures of other PBs to the risk factor of
+interest. With that in mind, we will eventually impose some reasonable
+distributions on $V_{n}(t)$'s and $I_{n}(t)$'s. 
+
+We will impose distribution on these parameters for all PBs, without
+singling out any particular one as "the" one we care about. But when
+specifying the distributions for the parameters we can obviously tighten the
+distribution of any one of them to adopt its point of view on the
+distributions.
+
+With the intention of randomizing these later, we assume that $V_{n}(t)$'s
+and $I_{n}(t)$'s are given for $n=1,\dots ,N.$
+
+\section{The model, assumptions and motivation}
+
+\subsection{Information on default}
+
+An important element of our model is the assumption on how the default of HF
+is revealed to the market, here meaning all relevant PBs. We assume that if
+the HF defaults at time $t,$ all PBs know about it at the same time. One can
+contemplate more elaborate mechanisms such as the $n$-th PB only finds out
+about HF's inability to post margin when it actually makes a margin call,
+which could be some time after $t$ due to how the margin agreement is
+structured, e.g. with thresholds, grace periods, etc. We will leave these
+complications for later research as our aim is to have a simple model that
+captures main features of the situation we are trying to model.
+
+\subsection{Default trigger}
+
+IM is typically calculated on each day (or at least regularly)\ assuming
+immediate default of the client (HF). We view our model as a sort of an
+add-on to that so make the same assumption -- our calculations as detailed
+below are on each day assuming immediate default of the HF for whatever
+reason (that forces liquidation of stock hedges by all PBs that push the
+stock lower thus leading to additional loss beyond the IM percentile loss in
+"normal" unwind that we are trying to estimate).
+
+It is of course likely that, with a large position, an initial downward move
+in the stock price triggered by some exogenous factor led to margin calls on
+the stock that led to the default of the HF. 
+
+The "immediate exogenous default" concept is appealing as it corresponds to
+the IM\ setup and hence directly comparable, and of course is rather simple
+in concept. We probably need to think a bit more about this as possible
+future enhancements. There are a couple of angles I can think of right now.
+One, if the default was triggered by a fall in price of the stock, that drop
+will also contribute to the overall loss of PBs. This is easy to accommodate
+as we just assume that the stock has a downward jump at time $t$ (the time
+of calculation, assumed to be the default time of the HF)%
+\begin{equation}
+\frac{S(t)-S(t-)}{S(t-)}=\delta \leq 0  \label{eq:deft1}
+\end{equation}%
+where $\delta $ is yet another model parameter.
+
+Another angle here could be to try to estimate the size of the jump $\delta $
+that would \emph{actually} \emph{trigger }the default of the HF. So the
+setup could be somewhat different, and the basic question that the model is
+answering would be "what if there is a jump $\delta $ at time $t$" rather
+than "what if there is a default of the HF\ at time $t$". More
+assumptions/unknown parameters would be required to estimate the jump that
+would trigger a default of the HF, however. So I think we should leave this
+for further research (?)
+
+\subsection{Decision lag}
+
+Another important characteristic of our model is the fact that there is a
+lag between the realization that the HF is possibly insolvent (e.g. hearing
+in the news that a margin call from some other PB was missed) and a decision
+to unwind the position. The behavioral motivation here is the empirically
+observed fact that for a large position with, presumably, an important
+client, a PB would need to reach certain level of consensus internally, and
+perhaps have various discussions with the HF, before getting required senior
+sign-offs for the unwind. Some PBs are more decisive here while others may
+have more internal layers to navigate. We model this "decision lag" as a
+random time $\omega _{n}(t)$ for the $n$-th PB, interpreted as the time when
+the unwind starts should the HF default at time $t.$ We consider this time
+as stochastic because of inherent uncertainty of how long the decision would
+take. Moreover, the parameters of this uncertainty are also uncertain due to
+imperfect information about the speed of decision making in PBs [XXX\ is
+this too complicated? random variable with random parameters? maybe we
+simplify this later].
+
+\subsection{Model for market impact}
+
+The model for the stock in the "normal" conditions is of the form%
+\begin{equation}
+dS(t)/S(t)=\sigma ~dW(t).  \label{eq:mi1}
+\end{equation}%
+Note that we ignore the drift because of short timeliness involved. However,
+we introduce another key part of our model and that is of market impact. The
+standard model of market impact is the so-called square root law [many refs
+here, see "articles" folder] that basically says that the impact (downward
+from selling in our case) is proportional to the square root of the number
+of shares sold vs. daily volume:%
+\begin{equation}
+\frac{S(u+dt)-S(u)}{S(u)}\sim \limfunc{sign}(Q(u))\times c\times \hat{\sigma}%
+\sqrt{\frac{\left\vert Q(u)\right\vert }{\nu }},  \label{eq:mi2}
+\end{equation}%
+where $Q(u)$ is the number of shares transacted at $u$, $\nu $ is the daily
+volume in shares, $\hat{\sigma}$ is the \textbf{daily} volatility and $c$
+some constant empirically observed to be close to $1,$ and $dt$ is one day, $%
+dt=1/250.$
+
+Eventually we will combine (\ref{eq:mi1}) and (\ref{eq:mi2}) where, for each
+day of selling, we combine the contributions from those PBs that are
+actually selling in (\ref{eq:mi2}).
+
+\subsection{MPOR and execution strategy}
+
+For the initial version of the model we assume that, given HF default at
+time $t,$ each PB would be selling its shares in equal daily amounts over
+the time period 
+\begin{equation*}
+\lbrack \omega _{n}(t),\omega _{n}(t)+\mu _{n}]
+\end{equation*}%
+where $\mu _{n},$ $n=1,\dots ,N,$ is the MPOR for he $n$-th PB. The
+collection $\{\mu _{n}\}$ is yet another input to the model that, from the
+point of view of one of the PBs, is random as it is not known with certainty.
+
+\subsection{Optimal execution}
+
+In future developments we could explore the question of what is the optimal
+execution strategy for a given PB given our model (and the uncertainty over
+parameters). In the "standard" optimal liquidation of a large order type
+problem, the optimal is VWAP [XXX? is this true, need to check], with the
+optimal strategy balancing market impact vs speed of execution. The problem
+would be more complicated here as there will be multiple competing PBs.
+
+\subsection{Losses}
+
+The total value realized by the $n$-th PB by selling its stock, assuming
+uniform execution strategy, is given by
+
+\begin{equation*}
+\frac{\pi _{n}}{\mu _{n}}\int_{\omega _{n}(t)}^{\omega _{n}(t)+\mu
+_{n}}S(t)~dt.
+\end{equation*}%
+The loss, assuming the HF defaults at $t,$ is then defined as%
+\begin{equation}
+L_{n}=\frac{\pi _{n}}{\mu _{n}}\int_{\omega _{n}(t)}^{\omega _{n}(t)+\mu
+_{n}}S(t)~dt+V_{n}(t)+I_{n}(t)-\pi _{n}S(0).  \label{eq:loss1}
+\end{equation}
+
+\section{The model, inner simulation}
+
+Given the above assumptions and definitions, it is pretty obvious how we
+would calculate the distribution of losses. 
+
+\begin{enumerate}
+\item There will be an outer loop to simulate the values of various
+parameters (positions, VMs, IMs, MPORs, decision lags, etc.)
+
+\item For each realization of the model parameters:
+
+\item Assume immediate default of the HF. If using (\ref{eq:deft1}),
+calculate $S(t)$ from the observed $S(t-),$ and assume all IMs, VMs etc. are
+associated with $S(t-),$ thus baking in a degree of immediate loss into the
+model
+
+\item For each day $u$ after the default until the last $\max_{n=1,\dots
+,N}\left\{ \omega _{n}(t)+\mu _{n}\right\} $:
+
+\begin{enumerate}
+\item Figure out the total amount of stock being sold:%
+\begin{equation*}
+Q(u)=\sum_{n=1}^{N}1_{\left\{ u\in \lbrack \omega _{n}(t),\omega _{n}(t)+\mu
+_{n}]\right\} }\frac{\pi _{n}}{\mu _{n}}
+\end{equation*}
+
+\item Simulate the stock price to next day using (here $dt=1$ day $=1/250$) 
+\begin{equation}
+S(u+dt)=S(u)\left( 1-c\sigma \sqrt{\frac{Q(u)}{\nu }dt}+\sigma ~\zeta (u)%
+\sqrt{dt}\right) .  \label{eq:S1}
+\end{equation}%
+Here as we recall $\sigma $ is the annual volatility, $c$ is an empirical
+constant close to one (model parameter)$,$ $\nu $ is estimated daily volume
+in shares, and $\zeta (u)$'s are i.i.d. Gaussian. 
+\end{enumerate}
+
+\item After each simulated path of $S$ is calculated, each PB's losses are
+calculated using (\ref{eq:loss1}).
+
+\item By running multiple paths we build a loss distribution for each PB
+
+\item We can also calculate the loss under the standard IM\ model for
+comparison by getting rid of the drift term in (\ref{eq:S1})
+\end{enumerate}
+
+\begin{remark}
+As written, the model requires both $S(0)$ (in (\ref{eq:loss1})) and $S(t-)$
+(in (\ref{eq:deft1}), (\ref{eq:S1})). On the other hand, assuming perfect
+collateralization with the variation margin, we would have%
+\begin{equation}
+V_{n}(t)+\pi _{n}\left( S(t-)-S(0)\right) =0  \label{eq:vm2}
+\end{equation}%
+so we can eliminate $S(0)$ from (\ref{eq:loss1}) and write%
+\begin{equation*}
+L_{n}=\frac{\pi _{n}}{\mu _{n}}\int_{\omega _{n}(t)}^{\omega _{n}(t)+\mu
+_{n}}S(t)~dt+I_{n}(t)-\pi _{n}S(t-).
+\end{equation*}
+\end{remark}
+
+\begin{remark}
+The assumption (\ref{eq:vm2}) could be too strong, and we can replace it
+with 
+\begin{equation}
+V_{n}(t)+\pi _{n}\left( S(t-)-S(0)\right) =G_{n}(t),  \label{eq:gap1}
+\end{equation}%
+where the "gap" $G_{n}(t)$ could be yet another model parameter, generally
+bounded by the threshold $R_{n}$ of the $n$-th PB\ margin account,%
+\begin{equation*}
+\left\vert G_{n}(t)\right\vert \leq R_{n}
+\end{equation*}%
+for $n=1,\dots ,N.$ The last equation could be used in
+simulating./randomizing these gaps. With (\ref{eq:gap1}) in mind, $S(0)$ can
+be eliminated from (\ref{eq:loss1}) so that we can be write%
+\begin{equation*}
+L_{n}=\frac{\pi _{n}}{\mu _{n}}\int_{\omega _{n}(t)}^{\omega _{n}(t)+\mu
+_{n}}S(t)~dt+I_{n}(t)+G_{n}(t)-\pi _{n}S(t-).
+\end{equation*}
+\end{remark}
+
+\section{The model, outer simulation}
+
+Here we need to think about how to parameterize distributions of various
+model parameters in a reasonable and flexible way. TBC
 
 \end{document}

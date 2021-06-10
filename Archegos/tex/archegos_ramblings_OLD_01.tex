@@ -1,0 +1,446 @@
+
+\documentclass{article}
+\usepackage{amsmath}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Saturday, June 05, 2021 09:00:47}
+%TCIDATA{LastRevised=Monday, June 07, 2021 12:34:12}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{tcilatex}
+
+\begin{document}
+
+
+\section{Background}
+
+Consider a hedge fund (HF) that wants to enter into a position referencing a
+risk factor $S=S(t)$ that, for simplicity, we call a stock. HF can enter
+into a cash position with its prime broker (PB) by
+
+\begin{itemize}
+\item Borrowing money from PB
+
+\item Buying the stock
+
+\item Pledging the stock as collateral for the loan
+\end{itemize}
+
+A PB would require a haircut, i.e. it would lend only, say, 90\% of the
+values of the shares it holds as collateral. So the economics, for a 100
+unit transaction, would be
+
+\begin{itemize}
+\item HF borrows enough money from PB\ for 90 units
+
+\item HF pays for 10 units from its own funds
+
+\item HF gives 100 units to the PB as collateral
+\end{itemize}
+
+In this case, if the value of the stock declines, HF\ needs to post more
+collateral (cash or other assets) to PB to make sure the value of the
+collateral the PB holds is at least 100/90 of the value of the initial loan.
+The "haircut" of 10 units is there is for PB's protection in case of the HF\
+not being able to post more collateral when required ("margin call"). The
+theory is then that if HF misses a margin call, the PB can sell the shares
+over a period of time (an input to the margin model, often 10 days or so) to
+recover its full loan value to PB even if shares are volatile over the
+period of liquidation (MPOR).
+
+Regulators require disclosure of large stock holdings so the whole market
+can see them. Some HFs may consider it advantageous to enter into positions
+that are not subject to disclosure. To that effect, a HF can enter, say, a
+total return swap on a particular stock, a derivative transaction with the
+PB\ that pays to the HF\ returns of the stock but, critically, is not
+subject to the same level of disclosure as physical equity holdings.
+Likewise, they can enter into other derivative transactions such as calls or
+collars (or puts, if they are betting against the stock).
+
+The mechanics of a total return swap are designed to closely replicate that
+of physical equity transaction but there some differences. A HF would agree
+to pay a certain rate (Libor or RFR+spread) and receive changes in MTM on
+the stock. The PB would buy the stock and hold it on its own books to hedge
+its obligations to the HF. The PB would borrow money from, say the treasury
+desk to buy the initial stock. While HF is solvent, PB\ is "riskless" in the
+sense that price changes on its holdings of the stock are just passed on to
+the client who bears market risk. If HF defaults for whatever reason, the PB
+will naturally stop paying/passing on stock returns to the HF and will
+suddenly be left with an unhedged position in the stock. Naturally, it will
+try to unwind it by selling its heding position. If the movement in the
+stock made it so that the value is less than what the PB owes to the
+treasury for the initial purchase, it would have to realize a loss. 
+
+Hence, the PB would typically require margins from PB. There are generally
+two kinds. One is the variation margin which ensures that the PB's stock
+value+variation margin is (roughly) equal to the original price the PB paid
+to buy the stock (so what it borrowed from the treasury). It can also be
+seen as the MTM on the TRS vs the HF, so essentially a standard CSA. This is
+a synthetic equivalent of the margin calls a HF would get on a physical
+stock holding. 
+
+The PB would also require the initial margin that would allow it to unwind
+its stock position in orderly fasion over a number of days, should the HF
+default and the stock move adversely over that many days. This the is
+equivalent of the "haircut" in the physical equity holding scenario.
+
+\section{Setup}
+
+Let $S=S(t)$ be the stock. Let us assume the underlying annualized lognormal
+volatility of the stock is $\sigma $. Consider $N+1$ primer brokers. We
+consider the situation from the point of view of broker $0.$ Let us assume
+that the HF has a total return swap position in $S$ against broker $0$ We
+denote the position that the PB $0$ has against HF as $\pi _{0}.$ This means
+that, if fully hedged, the PB $0$ paid%
+\[
+-\pi _{0}S(0)
+\]%
+at the time of the TRS initiation, and the value of its hedge at time $t$ is
+given by%
+\[
+\pi _{0}S(t).
+\]%
+So if the HF is long $S,$ the PB's hedging portfolio is also long $S$ and
+the MTM on the hedge portfolio for PB is%
+\[
+\pi _{0}\left( S(t)-S(0)\right) .
+\]%
+To be clear, if the HF is long $S,$ then PB is short $S$ on TRS, but long $S$
+in the hedge so $\pi _{0}>0.$
+
+\section{Stylized margin model}
+
+A broker requires an initial margin and a variation margin to be posted by
+the HF to cover its exposure to the risk factor $S.$ Simplistically, let us
+assume that the margin model is specific to exposure $S$ (no diversification
+benefits etc). The broker $0$ would require a variation margin $%
+V_{0}=V_{0}(t)$ that, when added to its hedge portfolio MTM, makes it
+roughly flat:%
+\begin{equation}
+V_{0}(t)+\pi _{0}\left( S(t)-S(0)\right) =0.  \label{eq:vm1}
+\end{equation}
+(XXX: does PB post VM to HF if in their favour? I think so but worth
+checking I suppose). In particular this states that the daily change in the
+variation margin is given by%
+\[
+V_{0}(t+dt)-V_{0}(t)=-\pi _{0}\left( S(t+dt)-S(t)\right) ,
+\]%
+where we used $dt$ to denote one day, $dt=1/250.$ We see that the variation
+margin is the change in the MTM for PB on the TRS vs HF (as $-\pi _{0}$ is
+the exposure of the PB on the TRS), just like we would expect in the normal
+CSA setup, see [VP1].
+
+In addition to the variation margin, PB requires an initial margin $%
+I_{0}=I_{0}(t)$ posted, whose purpose is to cover broker's costs if he needs
+to unwind the position should the client default, over an MPOR of $\mu _{0}$
+(say 10 days or so, $\mu _{0}=10/250$). A very stylized margin model would
+specify the initial margin to be a high percentile, $\alpha $ (say, $\alpha
+=99\%$) of the lower tail of its exposure to $S$ over the period of $%
+[t,t+\tau _{0}],$ assuming immediate default of HF at $t,$ implicitly
+defined by%
+\[
+\mathrm{P}\left( V_{0}(t)+\pi _{0}\left( S(t)-S(0)\right) +\pi _{0}\left(
+S(t+\mu _{0})-S(t)\right) +I_{0}(t)>0\right) =\alpha .
+\]%
+The value of the assets held by the PB in this expression are
+
+\begin{itemize}
+\item The VM
+
+\item The value of the stock hedge minus the price that was paid for it
+
+\item The (stochastic)\ change in the value of the stock hednge over $\mu
+_{0}$
+
+\item The initial margin that cover possible loss on this (being $<0$) to $%
+1-\alpha $ probability
+\end{itemize}
+
+We note that under the assumption (\ref{eq:vm1}) this simplifies to%
+\[
+\mathrm{P}\left( \pi _{0}\left( S(t+\mu _{0})-S(t)\right) +I_{0}(t)>0\right)
+=\alpha .
+\]%
+We however need to relax the assumption of the so-called
+"zero-threshold"/daily margin posting (\ref{eq:vm1}) to make the model
+realistic enough to describe the effects that we are after. We explain this
+next.
+
+\section{Thresholds}
+
+Variation margin may not be collected daily. Some margin agreements
+stipulate that the underlying position needs to move by a sufficient amount
+for the margin call to be made, the so-called \emph{threshold} (XXX:\ is
+this the right term). There could be two reasons for this. One is
+operational -- posting margin (essentially sending cash by wire transfer)
+costs a fixed amount of money both in fees and operational costs for both
+parties, and the agreement could be made that only when sufficiently
+significant change in required margin accumulates, the payment is made. 
+
+Another reason why we would want to introduce thresholds into the model we
+are building is behavioral. For a large position with, presumably, an
+important client, a PB would have a certain lag between a margin call being
+missed and the decision to start unwinding the underlying exposure. Lag
+times are institution-specific. To keep things simple, we roll this into the
+"implied" threshold that we bundle up with any actual thresholds that are
+hard-wired into the PB agreement (XXX: is this reasonable? do we want to
+model decision lag times explicitly as times not as margin levels?)
+
+It is not uncommon (XXX: is it?) to have the threshold to be at or around
+the level of the initial margin. The idea being that as long as the initial
+margin plus already-posted variational margin covers the current position,
+it is fine, and only needs to be topped up once this level is breached. This
+of course does not make a lot of sense from the definitions of the
+variational margin (current MTM) and the initial margin (protection against
+future changes in MTM\ in the case of default) but practicalities or perhaps
+"market practice" can lead to this (XXX This paragraph is perhaps irrelevant
+and we should keep IM and thresholds separate. Poor risk management implies
+lower IM and higher threshold, either real or implied, so the two are
+actually anti-correlated in a sense). 
+
+Let the threshold (a combination of real and implied) be $R_{n},$ $n=0,\dots
+,N.$
+
+It at time $t$ the value of the hedge position is $\pi _{0}\left(
+S(t)-S(0)\right) $ and the value of the VM is $V_{0}(t),$ then the next
+margin call for PB\ $0$ is given by the the (stochastic) time $\rho _{0}$
+such that%
+\[
+\rho _{0}=\inf_{u\geq t}\left\{ \pi _{0}\left( S(u)-S(0)\right)
++V_{0}(t)=-R_{0}\right\} 
+\]%
+and then, assuming normal operations, 
+\begin{align*}
+V_{0}(\rho _{0})& =-\pi _{0}\left( S(\rho _{0})-S(0)\right) , \\
+V_{0}(\rho _{0})-V_{0}(t)& =-\pi _{0}\left( S(\rho _{0})-S(0)\right)
+-V_{0}(t)=R_{0}.
+\end{align*}
+
+If the HF defaults on the margin call at this point, the broker has
+
+\begin{itemize}
+\item VM of $V_{0}(t)$
+
+\item A hedge position that is worth $\pi _{0}\left( S(\rho
+_{0})-S(0)\right) $ (this includes the need to repay the original loan from
+the treasury to buy the stock)
+
+\item The IM $I_{0}(t)$ (XXX here we assume the IM\ and VM are updated at
+the same time following the threshold concept we introduced earlier)
+\end{itemize}
+
+The sum of the first two items is the negative of the threshold $-R_{0}$. So
+there is can in the amount of $I_{0}(t)-R_{0}$ and $\pi _{0}$ worth of stock 
+$S$ to unwind. We assume the broker start selling immediately. 
+
+\section{Outline of the model}
+
+We have $N+1$ brokers. We assume time now is $t_{0}>0.$ PBs have exposures $%
+\pi _{n}$ to $S,$ hold $V_{n}(t_{0})$ VMs and $I_{n}(t_{0})$ IMs. They have
+their thresholds $R_{n}$ and "next" margin calls of $\rho _{n}.$ Here $%
+n=0,\dots ,N+1.$ 
+
+The "normal" evolution of the stock is given by 
+\[
+dS(t)/S(t)=\sigma ~dW(t)
+\]%
+where we assumed no drift (in the physical measure) because of relatively
+short time scales involved. 
+
+The model we are trying to build can be described as follows
+
+\begin{enumerate}
+\item $S(t)$ goes down for whatever reason (we are assuming here HF\ is long
+vs all the PBs)
+
+\item The PB with the shortest $\rho _{n}$ (smallest threshold $R_{n}$
+versus the gap between their VM and the value of their hedge portfolio)
+makes a margin call. Let's call this PB $\eta _{0}$
+
+\item The HF does not make the margin call
+
+\item PB $\eta _{0}$ starts selling
+
+\item This moves the stock lower -- here we use some sort of market impact
+model
+
+\item This triggers the margin call on the next PB ($\eta _{1}$). They start
+selling, increasing the downward drift
+
+\item This increases the selling pressure and triggers PB $\eta _{2}$ etc
+
+\item Everyone loses because of the strong downward drift not acccounted for
+in IM (not to mention delayed response time via $R_{n}$). But not the same
+amount -- the one with the tightest threshold $R_{n}$ and highest IM $I_{n}$
+loses the least
+\end{enumerate}
+
+The goal is to determine the distribution of losses for PB $0$ ("us") given
+that we do not have exact information about the positions and margins and
+margin agreements that all the other PBs $n=1,\dots ,N$ have but can put
+some distributions around them. Once the distribution of losses is
+estimated, it should be capitalized and/or extra "concentration" margin
+charged to the client as a mitigant.
+
+\section{Further on thresholds}
+
+Come to think of it, we should, after all, probably separate the real
+thresholds from the delays in execution. So let us assume that the real
+threshold is $R_{n}$, but once the margin call is missed, we assume PB $n$
+waits for $\omega _{n}$ time before starting to execute its unwinds. Here $%
+\omega _{n}$ is a random time, and we can recover our original setup by
+setting it to the first hitting time of the "implied" threshold. But for
+greater generality, and to study the effects of delays in execution
+separately from the markgin agreement details, we can keep it separate.
+
+\section{Market impact}
+
+The main point of our model is that the stock drifts lower and lower as more
+and more PBs starts selling their hedge portfolios. A standard model of
+market impact is the so-called square root law, see [Gatheral slides], [Toth
+et all],
+[https://quant.stackexchange.com/questions/41937/market-impact-why-square-root], [Kyle Obizhaeva] (XXX need a better reference here?) It states that the stock, apart from volatility, experiences price changes due to selling, in the form of%
+\[
+\frac{S(t_{k})-S(t_{k}-)}{S(t_{k}-)}\sim \limfunc{sign}(q_{k})\times c\times 
+\hat{\sigma}\sqrt{\frac{\left\vert q_{k}\right\vert }{\nu }}
+\]%
+where $q_{k}$ is the number of shares transacted at $t_{k}$, $\nu $ is the
+daily volume in shares, $\hat{\sigma}$ is the \textbf{daily} volatility
+unlike before and $c$ some constant empirically observed to be close to $1.$ 
+
+\begin{remark}
+We worry about the impact of LARGE trades, does that mean we need to look at
+different kinds of results? [Toth] states p2: "But as T increases, such as
+the number of trades becomes large, the relation between T and QT becomes
+more and more linear for small imbalances (see e.g.[3], Fig. 2.5)...", but
+also adds "...except in rare cases when $Q(T)/V$ is large, in any case much
+larger than the region where Eq. (1) holds". Goes on to duscuss square root
+singularity for small trades. However [Bershova et al] look specifically at
+large orders at also seems to see the square root there, although I did not
+read the paper carefully yet. From abstract "We examine price reversion
+after the completion of a trade, finding that permanent impact is also a
+square root function of trade duration", however I am not sure what "trade
+duration" is here
+\end{remark}
+
+\section{The Model}
+
+Let us try to formulate the model mathematically. The notations are going to
+be clunky. 
+
+The standard IM\ model calculates possible loss on the market position under
+the "orderly" unwind given an instantaneous default of the HF at time $T_{0}.
+$
+
+We would like co calculate the adjustment to that given "disorderly" unwind.
+
+At time $T_{0},$ each PB $n$ holds a cash position%
+\[
+C_{n}(T_{0})=-\pi _{n}S(0)+V_{n}(T_{0})+I_{n}(T_{0})
+\]%
+and a stock position%
+\[
+V_{n}(T_{0})=\pi _{n}S(T_{0})
+\]%
+We note that 
+\[
+\pi _{n}\left( S(T_{0})-S(0)\right) +V_{n}(T_{0})\geq -R_{n}
+\]%
+so%
+\[
+V_{n}(T_{0})+C_{n}(T_{0})\geq I_{n}(T_{0})-R_{n}.
+\]%
+At instantaneos default of the HF, each PB $n$ sells its hedge portfolio
+over the period $[\omega _{n}(T_{0}),\omega _{n}(T_{0})+\mu _{n}]$
+
+The stock experiences additive (accross PBs) downward treand from our market
+impact model over the time it is selling its portfolio.
+
+We are interested in the final stock price at time $\omega _{0}(T_{0})+\mu
+_{0}$ (as we are looking at this from PB $0$ perspective) but also the
+average price received over the course of the unwind or the overall realized
+proceeds
+
+Actually more generally this is all symmetric so maybe we do not need to
+distinguish PB $0$ so for each PB we calculate%
+\[
+\frac{\pi _{n}}{\mu _{n}}\int_{\omega _{n}(T_{0})}^{\omega _{n}(T_{0})+\mu
+_{n}}S(t)~dt+C_{n}(T_{0})
+\]%
+where the forst term represents the total price received in an unwind of the
+whole hedge position assuming the same number of shares are sold every day
+over the MPOR $\mu _{n}$.
+
+\section{OLD}
+
+We assume that at time $t_{0}>0$ there is an external shock to the stock
+price that results in the percentage drop of a fixed size $d,$ which is a
+model input,%
+\begin{gather*}
+\frac{S(t_{0})-S(t_{0}-)}{S(t_{0}-)}=\delta , \\
+S(t_{0})=S(t_{0}-)+\delta S(t_{0}-).
+\end{gather*}
+
+Recall that we consider everything from the point of view of PB $0.$ If 
+\begin{eqnarray*}
+\pi _{0}\left( S(t_{0})-S(0)\right) +V_{0}(t_{0})+R_{0} &>&0 \\
+\pi _{0}\delta S(t_{0}-)+\pi _{0}\left( S(t_{0}-)-S(0)\right)
++V_{0}(t_{0})+R_{0} &>&0
+\end{eqnarray*}%
+Then nothing happens, as no margin call.
+
+If, on the other hand, $\delta $ is sufficiently negative so that 
+\[
+\pi _{0}\delta S(t_{0}-)<-\pi _{0}\left( S(t_{0}-)-S(0)\right)
+-V_{0}(t_{0})-R_{0}
+\]%
+there will be a margin call. The HF can either meet the margin call, or not.
+Let us denote the probability of not meeting the margin call by $p,$ and we
+condition the discussion below on this event, let's call the event $D$ (for
+"default", noturally). PB $0$ will sell its hedge position from the time $%
+t_{0}+\omega _{0}$ to time $t_{0}+\omega _{0}+\mu _{0}$ in equal amounts
+each day (XXX this is or assumption; I suppose one can ask what is the
+optimal execution strategy given everything that happens next)
+
+Our main question is how much PB $0$ will be able to realize/its overall
+loss given the dynamics we describe below.
+
+The considerations above apply to all other PBs $n=1,\dots ,N.$ We assume
+that the probability $p$ of missing a margin call is the same against all
+PBs. The only difference is in reaction times of different PBs. The period
+of interest to us is from $t_{0}$ to $t_{0}+\omega _{0}+\mu _{0}.$ Consider
+PB $n.$ It will have its own margin call at time 
+\[
+d<
+\]
+we have $\omega _{n}$ which is the t
+
+\end{document}

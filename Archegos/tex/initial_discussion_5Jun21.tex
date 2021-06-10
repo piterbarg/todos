@@ -1,0 +1,105 @@
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Sunday, June 06, 2021 10:10:21}
+%TCIDATA{LastRevised=Sunday, June 06, 2021 10:31:09}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{tcilatex}
+\begin{document}
+
+
+I do think it is interesting and has potential, both practically and as a
+model exercise
+
+Let's do it!
+
+The good thing about the canvas you're summarising below is that it can
+cover the full spectrum from the full uncertainty (we don't know either the
+other PB's positions, or the other PB's margin arrangements), progressively
+to the full certainty (we know both or have a tight distribution around
+those). For the full uncertainty it would probably be a rather wide-band
+calculation, so maybe not practically very useful, but this assessment could
+be another way of driving home that the industry needs to have certainty, at
+least about the positions if not about the specific margin arrangements.
+
+Anton.
+
+\TEXTsymbol{>} On 5 Jun 2021, at 11:29 am, Vladimir V. Piterbarg \TEXTsymbol{%
+<}piterbarg@gmail.com\TEXTsymbol{>} wrote:
+
+\TEXTsymbol{>}
+
+\TEXTsymbol{>} \U{feff}
+
+\TEXTsymbol{>} Privet
+
+\TEXTsymbol{>}
+
+\TEXTsymbol{>} was great to see you yesterday. We sort of joked about
+writing a paper inspired by Archegos, but the more I think about it, the
+more I see that we can possibly get something interesting going. Or at least
+explore it. As a very initial brainstorming, this could go something like
+this. The paper is about enhancing existing margin models with a concept of
+some sort of feedback loop for large positions where, as you said, the MPOR
+concept does not work
+
+\TEXTsymbol{>}
+
+\TEXTsymbol{>} 1. Existing margin models assume an orderly if slow unwind of
+a position into a market that can absorb it without market impact
+
+\TEXTsymbol{>} 2. Not realistic as we have seen for some large positions
+
+\TEXTsymbol{>} 3. Let's say a PB has a concentrated large position with a
+HF. The new model we are building would recognize that a similar position
+(some distribution here) can be held with other PBs (assume the number of
+PBs a HF has is known, or can be well approximated, or some random number)
+
+\TEXTsymbol{>} 4. assume some distribution of margin held by different PBs
+against the same position
+
+\TEXTsymbol{>} 5. Build a feedback model that, as soon as the position
+breaches the lowest-margin PB limit (or a margin call is missed), the PB
+would start unwinding, thus triggering a feedback loop that moves the
+position against better capitalized PBs who in turn start unwinding leading
+to a cascade effect
+
+\TEXTsymbol{>} 6. Then the distribution that should be used for margin would
+have a drift from "rush to the exit" by PBs, and also some market volatility
+as in a "normal" margin model
+
+\TEXTsymbol{>} 7. We build some, perhaps somewhat complicated, model like
+that and then, if we can, simplify it to some simple rule that, let's say,
+can be offered to the industry as a reasonable rule of thumb to add on to
+the "standard" margin for large concentrated positions
+
+\end{document}

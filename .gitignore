@@ -3,6 +3,7 @@
 *.log
 *.bak
 *.aux
+*.aaa
 
 
 # Byte-compiled / optimized / DLL files
