@@ -4,6 +4,7 @@
 *.bak
 *.aux
 *.aaa
+*.tcp
 
 
 # Byte-compiled / optimized / DLL files
