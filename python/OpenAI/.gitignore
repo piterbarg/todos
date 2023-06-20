@@ -1,0 +1,2 @@
+# do not put secrets file in git
+*.env
